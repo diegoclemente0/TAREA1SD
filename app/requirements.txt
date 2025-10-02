@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+asyncpg
+redis>=4.5.0
+requests
+python-dotenv
+google-genai
+numpy
+pandas
+matplotlib

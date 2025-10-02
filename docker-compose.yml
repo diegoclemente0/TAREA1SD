@@ -1,0 +1,40 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: examplepass
+      POSTGRES_DB: qa
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    command: ["redis-server", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lfu"]  #cambiar allkeys-lfu por allkeys-lru para otra politica de remoción
+    ports:
+      - "6379:6379"
+
+  app:
+    build: ./app
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DSN=postgresql://postgres:examplepass@db:5432/qa
+      - REDIS_URL=redis://redis:6379/0
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=${GEMINI_MODEL}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./outputs:/app/outputs 
+    env_file:
+      - .env
+    restart: unless-stopped
+
+volumes:
+  pgdata:
